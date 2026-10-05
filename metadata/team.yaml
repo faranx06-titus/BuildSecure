@@ -5,13 +5,13 @@
 
 team:
   team_id: ""
-  name: ""
+  name: "Beluga X"
   repository: "" # URL of the newly created GitHub repository for this project
 
 members:
-  - name: ""
+  - name: "DUDEKULA MOHAMMED FARHAN"
     email: ""
-  - name: ""
+  - name: "CHITTIMALLA VISHWATEJ"
     email: ""
   - name: ""
     email: ""
