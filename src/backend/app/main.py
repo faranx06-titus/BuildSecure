@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy import text
 
 from app.database import engine, Base
@@ -28,17 +29,26 @@ from app.routers.doctor import router as doctor_router
 
 Base.metadata.create_all(bind=engine)
 
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+        return response
+
 app = FastAPI(
     title="MediDesk API",
     description="Security-focused clinic management API",
     version="0.1.0",
 )
 
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "*",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -61,18 +71,11 @@ app.include_router(doctor_router)
 
 @app.get("/")
 def root():
-    return {
-        "message": "MediDesk API is running",
-        "status": "ok",
-        "endpoints": ["/auth", "/doctor", "/patient", "/health"]
-    }
+    return {"message": "MediDesk API is running", "status": "ok", "endpoints": ["/auth", "/doctor", "/patient", "/health"]}
 
 @app.get("/health")
 def health_check():
-    return {
-        "status": "healthy",
-        "message": "MediDesk backend is awake and responsive"
-    }
+    return {"status": "healthy", "message": "MediDesk backend is awake and responsive"}
 
 @app.get("/health/db")
 def database_health_check():
