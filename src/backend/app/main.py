@@ -26,9 +26,7 @@ from app.routers.security import router as security_router
 from app.routers.patient import router as patient_router
 from app.routers.doctor import router as doctor_router
 
-
 Base.metadata.create_all(bind=engine)
-
 
 app = FastAPI(
     title="MediDesk API",
@@ -36,22 +34,15 @@ app = FastAPI(
     version="0.1.0",
 )
 
-
-# CORS — must come AFTER app = FastAPI(...)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://build-secure-phi.vercel.app",
-
-
+        "*",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 app.include_router(auth_router)
 app.include_router(users_router)
@@ -68,36 +59,26 @@ app.include_router(security_router)
 app.include_router(patient_router)
 app.include_router(doctor_router)
 
-
 @app.get("/")
 def root():
     return {
         "message": "MediDesk API is running",
         "status": "ok",
+        "endpoints": ["/auth", "/doctor", "/patient", "/health"]
     }
-
 
 @app.get("/health")
 def health_check():
     return {
         "status": "healthy",
+        "message": "MediDesk backend is awake and responsive"
     }
-
 
 @app.get("/health/db")
 def database_health_check():
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
-
-        return {
-            "status": "healthy",
-            "database": "connected",
-        }
-
+        return {"status": "healthy", "database": "connected"}
     except Exception as error:
-        return {
-            "status": "unhealthy",
-            "database": "disconnected",
-            "error": str(error),
-        }
+        return {"status": "unhealthy", "database": "disconnected", "error": str(error)}
