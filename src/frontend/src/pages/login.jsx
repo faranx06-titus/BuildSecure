@@ -47,54 +47,49 @@ export default function Login() {
 
     try {
       if (isRegistering) {
+        // Registration
         const response = await api.post("/auth/register", {
-          name,
-          email,
-          password,
+          name: name,
+          email: email,
+          password: password,
           role: "patient",
         });
         alert(response.data.message || "Registration successful!");
         setIsRegistering(false);
       } else {
+        // Login
         const response = await api.post("/auth/login", {
-          email,
-          password,
+          email: email,
+          password: password,
         });
 
         const data = response.data;
 
-        if (
-          loginType === "patient" &&
-          data.role !== "patient"
-        ) {
+        if (loginType === "patient" && data.role !== "patient") {
           throw new Error("Please use the correct login portal.");
         }
-
-        if (
-          loginType === "doctor" &&
-          data.role !== "doctor"
-        ) {
+        if (loginType === "doctor" && data.role !== "doctor") {
           throw new Error("Please use the correct login portal.");
         }
-
-        if (
-          loginType === "staff" &&
-          !["staff", "admin"].includes(data.role)
-        ) {
+        if (loginType === "staff" && !["staff", "admin"].includes(data.role)) {
           throw new Error("Please use the correct login portal.");
         }
 
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("user", JSON.stringify(data));
-
         navigate("/dashboard");
       }
     } catch (err) {
-      setError(
-        err.response?.data?.detail ||
-          err.message ||
-          "Action failed"
-      );
+      console.error("API Error:", err);
+      if (err.response) {
+        // Server responded with a status code outside 2xx
+        setError(`Error ${err.response.status}: ${err.response.data?.detail || "Server Error"}`);
+      } else if (err.request) {
+        // Request was made but no response was received
+        setError("Network Error: The server is not responding. Please wake up the backend at https://buildsecure.onrender.com/health first.");
+      } else {
+        setError(err.message || "An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -241,7 +236,7 @@ export default function Login() {
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl p-3 text-sm">
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl p-3 text-sm font-medium">
                 {error}
               </div>
             )}
