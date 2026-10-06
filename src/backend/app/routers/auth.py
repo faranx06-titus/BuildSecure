@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -7,14 +8,22 @@ from app.schemas.auth import RegisterRequest, LoginRequest
 from app.security.password import hash_password, verify_password
 from app.security.jwt import create_access_token
 from app.services.audit import log_event
-from fastapi import Request
 from app.security.rate_limit import check_login_rate_limit
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+router = APIRouter(
+    prefix="/auth",
+    tags=["Authentication"],
+)
 
 
 @router.post("/register")
-def register(data: RegisterRequest, db: Session = Depends(get_db)):
+def register(
+    data: RegisterRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    client_ip = request.client.host if request.client else "unknown"
 
     existing_user = (
         db.query(User)
@@ -28,17 +37,28 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
             detail="Email already registered",
         )
 
-    if data.role not in ["patient", "doctor"]:
+    # Public registration is ONLY for patients.
+    # Doctors and staff must use professional onboarding.
+    if data.role != "patient":
+        log_event(
+            db=db,
+            action="REGISTRATION_PRIVILEGE_BLOCKED",
+            resource="user",
+            ip_address=client_ip,
+            status="blocked",
+        )
+
         raise HTTPException(
-            status_code=400,
-            detail="Invalid role",
+            status_code=403,
+            detail="Only patient registration is allowed. Professionals must apply through Join Hospital.",
         )
 
     user = User(
         name=data.name,
         email=data.email,
         password_hash=hash_password(data.password),
-        role=UserRole(data.role),
+        role=UserRole.PATIENT,
+        department=None,
         is_active=1,
     )
 
@@ -48,12 +68,12 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
 
     log_event(
         db=db,
-        action="register",
+        action="REGISTER_SUCCESS",
         user_id=user.id,
         resource="user",
         resource_id=user.id,
-        ip_address=None,  # You can get the IP address from the request if needed
-        status="success"
+        ip_address=client_ip,
+        status="success",
     )
 
     return {
@@ -62,31 +82,27 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
         "role": user.role.value,
     }
 
-client_ip = request.client.host if request.client else "unknown"
-
-if not check_login_rate_limit(client_ip):
-    log_event(
-        db=db,
-        action="LOGIN_RATE_LIMIT",
-        resource="authentication",
-        status="blocked",
-        ip_address=client_ip,
-    )
-
-    raise HTTPException(
-        status_code=429,
-        detail="Too many login attempts. Try again later.",
-    )
-
 @router.post("/login")
- 
-def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
+def login(
+    data: LoginRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    client_ip = request.client.host if request.client else "unknown"
 
-    # Check rate limit
-    if not check_login_rate_limit(data.email):
+    # Rate limit login attempts
+    if not check_login_rate_limit(client_ip):
+        log_event(
+            db=db,
+            action="LOGIN_RATE_LIMIT",
+            resource="authentication",
+            ip_address=client_ip,
+            status="blocked",
+        )
+
         raise HTTPException(
             status_code=429,
-            detail="Too many login attempts. Please try again later.",
+            detail="Too many login attempts. Try again later.",
         )
 
     user = (
@@ -95,23 +111,36 @@ def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
         .first()
     )
 
+    # Invalid credentials
     if not user or not verify_password(
         data.password,
-        user.password_hash,
+        user.password_hash if user else "",
     ):
         log_event(
             db=db,
-            action="login",
+            action="LOGIN_FAILED",
             user_id=user.id if user else None,
-            resource="user",
+            resource="authentication",
             resource_id=user.id if user else None,
-            ip_address=None,  # You can get the IP address from the request if needed
-            status="failure"
+            ip_address=client_ip,
+            status="blocked",
         )
+
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password",
         )
+
+    # Successful login
+    log_event(
+        db=db,
+        action="LOGIN_SUCCESS",
+        user_id=user.id,
+        resource="authentication",
+        resource_id=user.id,
+        ip_address=client_ip,
+        status="success",
+    )
 
     access_token = create_access_token(
         {
@@ -128,3 +157,4 @@ def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
         "name": user.name,
         "role": user.role.value,
     }
+

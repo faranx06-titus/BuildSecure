@@ -1,14 +1,34 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+
 from app.database import engine, Base
-from app.models import User, Appointment, MedicalRecord, AuditLog
+from app.models import (
+    User,
+    Appointment,
+    MedicalRecord,
+    AuditLog,
+    ProfessionalApplication,
+)
+
 from app.routers.auth import router as auth_router
 from app.routers.users import router as users_router
 from app.routers.appointments import router as appointments_router
 from app.routers.medical_records import router as medical_records_router
 from app.routers.admin import router as admin_router
-# Create all tables
+from app.routers.applications import router as applications_router
+from app.routers.applications_admin import router as applications_admin_router
+from app.routers.staff import router as staff_router
+from app.routers.finance import router as finance_router
+from app.routers.hr import router as hr_router
+from app.routers.operations import router as operations_router
+from app.routers.security import router as security_router
+from app.routers.patient import router as patient_router
+from app.routers.doctor import router as doctor_router
+
+
 Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI(
     title="MediDesk API",
@@ -16,11 +36,36 @@ app = FastAPI(
     version="0.1.0",
 )
 
+
+# CORS — must come AFTER app = FastAPI(...)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(appointments_router)
 app.include_router(medical_records_router)
 app.include_router(admin_router)
+app.include_router(applications_router)
+app.include_router(applications_admin_router)
+app.include_router(staff_router)
+app.include_router(finance_router)
+app.include_router(hr_router)
+app.include_router(operations_router)
+app.include_router(security_router)
+app.include_router(patient_router)
+app.include_router(doctor_router)
+
+
 @app.get("/")
 def root():
     return {
