@@ -109,11 +109,13 @@ export default function Sidebar({ role, department }) {
   }
 
   return (
-    <aside className="w-64 min-h-screen bg-slate-950 text-white flex flex-col">
-      <div className="px-6 py-6 border-b border-slate-800">
-        <h1 className="text-2xl font-bold">MediDesk</h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Secure Healthcare Platform
+    <aside className="w-64 min-h-screen bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-white flex flex-col z-20">
+      <div className="px-6 py-8 border-b border-white/10">
+        <h1 className="text-2xl font-bold tracking-tight">
+          Medi<span className="text-[#2ee6c5]">Desk</span>
+        </h1>
+        <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">
+          Secure Platform
         </p>
       </div>
 
@@ -126,27 +128,27 @@ export default function Sidebar({ role, department }) {
               key={link.to}
               to={link.to}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   isActive
-                    ? "bg-white text-slate-950"
-                    : "text-slate-300 hover:bg-slate-800"
+                    ? "bg-[#2ee6c5] text-slate-950 shadow-[0_0_15px_rgba(46,230,197,0.4)]"
+                    : "text-slate-400 hover:bg-white/5 hover:text-white"
                 }`
               }
             >
               <Icon size={19} />
-              <span>{link.label}</span>
+              <span className="font-medium">{link.label}</span>
             </NavLink>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-800">
+      <div className="p-4 border-t border-white/10">
         <button
           onClick={logout}
-          className="flex items-center gap-3 w-full px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-lg"
+          className="flex items-center gap-3 w-full px-4 py-3 text-slate-400 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all"
         >
           <LogOut size={19} />
-          Logout
+          <span className="font-medium">Logout</span>
         </button>
       </div>
     </aside>

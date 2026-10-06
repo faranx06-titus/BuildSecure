@@ -2,54 +2,87 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+
 :root {
-  --classic-blue: #1e293b;
-  --classic-accent: #3b82f6;
-  --classic-bg: #f8fafc;
-  --classic-border: #e2e8f0;
-  --classic-text: #334155;
-  --classic-text-dark: #0f172a;
+  --bg: #070b14;
+  --card: rgba(255, 255, 255, 0.06);
+  --bd: rgba(255, 255, 255, 0.12);
+  --tx: #eef2ff;
+  --mut: #93a0bd;
+  --a: #2ee6c5;
+  --b: #8b5cf6;
+  --warn: #fbbf24;
+  --bad: #fb7185;
+  --inp: rgba(255, 255, 255, 0.07);
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--classic-bg);
-  color: var(--classic-text);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  background-color: var(--bg);
+  color: var(--tx);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* Custom scrollbar for professional feel */
-::-webkit-scrollbar {
-  width: 8px;
+/* The Glassmorphism Effect */
+.glass {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 20px;
+  transition: all 0.3s ease;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+.glass:hover {
+  border-color: var(--a);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
+/* Neon Gradients */
+.grad-text {
+  background: linear-gradient(90deg, var(--a), var(--b));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+.btn-neon {
+  background: linear-gradient(90deg, var(--a), #7dd3fc);
+  color: #06121a;
+  font-weight: 700;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.classic-card {
-  @apply bg-white border border-slate-200 shadow-sm rounded-xl transition-all duration-200;
+.btn-neon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(46, 230, 197, 0.35);
 }
 
-.classic-card:hover {
-  @apply shadow-md border-slate-300;
+/* Floating Blobs for Background */
+.blob {
+  position: fixed;
+  width: 46vmax;
+  height: 46vmax;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.2;
+  z-index: -1;
+  pointer-events: none;
+  animation: float 18s ease-in-out infinite alternate;
 }
 
-.classic-btn-primary {
-  @apply bg-slate-900 text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-slate-800 disabled:opacity-50;
+.blob-1 { background: var(--b); top: -15vmax; left: -10vmax; }
+.blob-2 { background: var(--a); bottom: -18vmax; right: -12vmax; animation-delay: -8s; }
+
+@keyframes float {
+  to { transform: translate(8vmax, 6vmax) scale(1.15); }
 }
 
-.classic-btn-secondary {
-  @apply bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-lg font-medium transition-colors hover:bg-slate-50;
-}
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bd); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--a); }

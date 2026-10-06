@@ -64,58 +64,58 @@ function Dashboard() {
     <Layout>
       <div className="space-y-8">
         <div className="mb-8">
-          <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+          <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">
             Welcome back
           </p>
 
-          <h1 className="text-4xl font-bold text-slate-900 mt-1">
+          <h1 className="text-5xl font-bold text-white mt-1">
             {user.name}
           </h1>
 
-          <p className="text-slate-600 mt-2 text-lg">
+          <p className="text-slate-400 mt-2 text-lg">
             {description}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="classic-card p-6">
+          <div className="glass p-6">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Workspace
             </p>
 
-            <p className="text-xl font-bold mt-2 capitalize text-slate-900">
+            <p className="text-2xl font-bold mt-2 capitalize text-white">
               {department || role}
             </p>
           </div>
 
-          <div className="classic-card p-6">
+          <div className="glass p-6">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Access Level
             </p>
 
-            <p className="text-xl font-bold mt-2 capitalize text-slate-900">
+            <p className="text-2xl font-bold mt-2 capitalize text-white">
               {role}
             </p>
           </div>
 
-          <div className="classic-card p-6">
+          <div className="glass p-6">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Security Status
             </p>
 
-            <p className="text-xl font-bold mt-2 text-green-600 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-600 animate-pulse" />
+            <p className="text-2xl font-bold mt-2 text-[#2ee6c5] flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-[#2ee6c5] animate-pulse" />
               Protected
             </p>
           </div>
         </div>
 
-        <div className="classic-card p-8">
-          <h2 className="text-xl font-bold text-slate-900">
+        <div className="glass p-8">
+          <h2 className="text-2xl font-bold text-white">
             {title}
           </h2>
 
-          <p className="text-slate-600 mt-3 leading-relaxed">
+          <p className="text-slate-400 mt-3 leading-relaxed text-lg">
             Use the navigation panel to access your authorized
             MediDesk services. All activity is encrypted and audited for security.
           </p>
